@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:koko_todo/data/database.dart';
 import 'package:koko_todo/util/dialog_box.dart';
 import 'package:koko_todo/util/todo_tile.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -11,28 +13,38 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  // reference the hive box
+  final _myBox = Hive.box('mybox');
+  ToDoDataBase db = ToDoDataBase();
+
+  @override
+  void initState() {
+    super.initState();
+    // if this is the 1st time ever opening the app, then create default data
+    if (_myBox.get("TODOLIST") == null) {
+      db.createInitialData();
+    } else {
+      // there already exists data
+      db.loadData();
+    }
+  }
+
   // text controller
   final _controller = TextEditingController();
-
-  // onCancel method
-  // list of todo tasks
-  final List<List<Object>> toDoList = [
-    ["Make tutorial", false],
-    ["Do exercise", false],
-  ];
   // checkbox changed
   void checkBoxChanged(bool? value, int index) {
     setState(() {
-      final current = toDoList[index][1] as bool;
-      toDoList[index][1] = !current;
+      db.toDoList[index][1] = value ?? false;
     });
+    db.updateDataBase(); // 🔑 persist change
   }
 
   void saveNewTask() {
     setState(() {
-      toDoList.add([_controller.text, false]);
+      db.toDoList.add([_controller.text, false]);
       _controller.clear();
     });
+    db.updateDataBase(); // persist new task
     // get rid of damn dialog box
     Navigator.of(context).pop();
   }
@@ -50,8 +62,9 @@ class _HomePageState extends State<HomePage> {
 
   void deleteTask(int index) {
     setState(() {
-      toDoList.removeAt(index);
+      db.toDoList.removeAt(index);
     });
+    db.updateDataBase(); // persist deletion
   }
 
   @override
@@ -68,10 +81,10 @@ class _HomePageState extends State<HomePage> {
         child: Icon(Icons.add),
       ),
       body: ListView.builder(
-        itemCount: toDoList.length,
+        itemCount: db.toDoList.length,
         itemBuilder: (context, index) {
-          final name = toDoList[index][0] as String;
-          final done = toDoList[index][1] as bool;
+          final name = db.toDoList[index][0] as String;
+          final done = db.toDoList[index][1] as bool;
 
           return ToDoTile(
             key: ValueKey(name), // important for slidable
