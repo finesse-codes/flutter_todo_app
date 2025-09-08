@@ -16,20 +16,22 @@ class _HomePageState extends State<HomePage> {
 
   // onCancel method
   // list of todo tasks
-  List toDoList = [
+  final List<List<Object>> toDoList = [
     ["Make tutorial", false],
     ["Do exercise", false],
   ];
   // checkbox changed
   void checkBoxChanged(bool? value, int index) {
     setState(() {
-      toDoList[index][1] = !toDoList[index][1];
+      final current = toDoList[index][1] as bool;
+      toDoList[index][1] = !current;
     });
   }
 
   void saveNewTask() {
     setState(() {
       toDoList.add([_controller.text, false]);
+      _controller.clear();
     });
     // get rid of damn dialog box
     Navigator.of(context).pop();
@@ -38,14 +40,18 @@ class _HomePageState extends State<HomePage> {
   void createNewTask() {
     showDialog(
       context: context,
-      builder: (context) {
-        return DialogBox(
-          controller: _controller,
-          onSave: saveNewTask,
-          onCancel: () => Navigator.of(context).pop,
-        );
-      },
+      builder: (context) => DialogBox(
+        controller: _controller,
+        onSave: saveNewTask,
+        onCancel: () => Navigator.of(context).pop(),
+      ),
     );
+  }
+
+  void deleteTask(int index) {
+    setState(() {
+      toDoList.removeAt(index);
+    });
   }
 
   @override
@@ -64,10 +70,15 @@ class _HomePageState extends State<HomePage> {
       body: ListView.builder(
         itemCount: toDoList.length,
         itemBuilder: (context, index) {
+          final name = toDoList[index][0] as String;
+          final done = toDoList[index][1] as bool;
+
           return ToDoTile(
-            taskName: toDoList[index][0],
-            taskCompleted: toDoList[index][1],
+            key: ValueKey(name), // important for slidable
+            taskName: name,
+            taskCompleted: done,
             onChanged: (value) => checkBoxChanged(value, index),
+            deleteFunction: (ctx) => deleteTask(index),
           );
         },
       ),
