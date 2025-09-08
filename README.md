@@ -11,8 +11,4 @@ Todo app using flutter
 
 ## Screenshots
 
-![add new todo](https://github.com/finesse-codes/flutter_todo_app/blob/main/images/new_task.png?raw=true)
-
-## Screenshots
-
-![delete todo](https://github.com/finesse-codes/flutter_todo_app/blob/main/images/delete_slider.png?raw=true)
+![add new todo](https://github.com/finesse-codes/flutter_todo_app/blob/main/images/new_task.png?raw=true) ![delete todo](https://github.com/finesse-codes/flutter_todo_app/blob/main/images/delete_slider.png?raw=true)
